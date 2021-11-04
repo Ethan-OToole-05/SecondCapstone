@@ -3,7 +3,7 @@ using TenmoServer.Models;
 
 namespace TenmoServer.DAO
 {
-    public interface IUserDao
+    public interface IUserDAO
     {
         User GetUser(string username);
         User AddUser(string username, string password);
