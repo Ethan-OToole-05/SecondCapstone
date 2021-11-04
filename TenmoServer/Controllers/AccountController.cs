@@ -20,20 +20,21 @@ namespace TenmoServer.Controllers
         {
             accountDAO = _accountDAO;
         }
-        [HttpGet]
-        public ActionResult<Account> GetAccount(int accountId)
+        [HttpGet("user/{userId}")]
+        public ActionResult<Account> GetAccount(int userId)
         {
-            Account account = accountDAO.GetAccountId(accountId);
+            Account account = accountDAO.GetAccountByUserId(userId);
             if (account != null)
             {
                 return account;
-            } else
+            }
+            else
             {
-                throw new HttpRequestException("Error Occurred: Could locate account.");
+                throw new HttpRequestException("Error Occurred: Could not locate account.");
             }
         }
-        [HttpGet("user_id")]
-        public ActionResult<Account> GetBalanace(int userId)
+        [HttpGet("balance/{userId}")]
+        public ActionResult<Account> GetBalance(int userId)
         {
             Account account = accountDAO.GetBalance(userId);
             if (account != null)
@@ -46,13 +47,28 @@ namespace TenmoServer.Controllers
             }
 
         }
-        //[HttpPut]
-        //public ActionResult<Account> UpdateBalance(int userId, Account account) {
-        //Account existingAccount = AccountDAO.GetAccountId(userId);
-        //if(existingAccount != null) {
-        //if(AccountDAO.UpdateBalance(account)) {
-        //return account;
-        
-    
+
+        [HttpPut("balance/{userId}")]
+        public ActionResult<Account> UpdateBalance(Account updatedAccount, int userId)
+        {
+            bool result = false;
+            Account existingAccount = accountDAO.GetAccountByUserId(userId);
+            if (existingAccount != null)
+            {
+                updatedAccount.AccountId = existingAccount.AccountId;
+                updatedAccount.UserId = existingAccount.UserId;
+
+                result = accountDAO.UpdateBalance(updatedAccount, userId);
+                
+            } 
+            if(result)
+            {
+                return Ok();
+            }
+            else
+            {
+                return StatusCode(500);
+            }
+        }
     }
 }
