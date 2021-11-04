@@ -7,12 +7,12 @@ using TenmoServer.Security.Models;
 
 namespace TenmoServer.DAO
 {
-    public class UserSqlDao : IUserDao
+    public class UserSqlDAO : IUserDAO
     {
         private readonly string connectionString;
         const decimal startingBalance = 1000;
 
-        public UserSqlDao(string dbConnectionString)
+        public UserSqlDAO(string dbConnectionString)
         {
             connectionString = dbConnectionString;
         }
