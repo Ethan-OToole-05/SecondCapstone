@@ -7,11 +7,11 @@ using TenmoServer.Models;
 
 namespace TenmoServer.DAO
 {
-    public class TransferSqlDao : ITransferDao
+    public class TransferSqlDAO : ITransferDAO
     {
         private readonly string connectionString;
 
-        public TransferSqlDao(string dbConnectionString)
+        public TransferSqlDAO(string dbConnectionString)
         {
             connectionString = dbConnectionString;
         }
