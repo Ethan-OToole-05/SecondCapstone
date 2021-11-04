@@ -6,6 +6,7 @@ using TenmoServer.Models;
 using TenmoServer.Security;
 using TenmoServer.DAO;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Http;
 
 namespace TenmoServer.Controllers
 {
@@ -28,7 +29,7 @@ namespace TenmoServer.Controllers
                 return account;
             } else
             {
-                return null;
+                throw new HttpRequestException("Error Occurred: Could locate account.");
             }
         }
         [HttpGet("user_id")]
@@ -41,11 +42,17 @@ namespace TenmoServer.Controllers
             }
             else
             {
-                return null;
+                throw new HttpRequestException("Error Occurred: Could not locate balance.");
             }
 
         }
-        //[HttpGet("balance/user_id)]
+        //[HttpPut]
+        //public ActionResult<Account> UpdateBalance(int userId, Account account) {
+        //Account existingAccount = AccountDAO.GetAccountId(userId);
+        //if(existingAccount != null) {
+        //if(AccountDAO.UpdateBalance(account)) {
+        //return account;
+        
     
     }
 }
