@@ -100,14 +100,15 @@ namespace TenmoClient
                 else if (menuSelection == 2)
                 {
                     List<Transfer> transferList = transferService.GetUsersTransfers(userService.GetUserId());
+                    Account userAccount = accountService.GetAccount(userService.GetUserId());
                     Console.WriteLine("---------------------");
                     Console.WriteLine("Transfers");
                     Console.WriteLine("ID        From/To           Amount");
                     Console.WriteLine("----------------------");
-                    foreach (Transfer transfer in transferList)
+                    foreach (Transfer transfer in transferList) 
                     {
                         string sender = "";
-                        if(transfer.TransferTypeId == 2)
+                        if(transfer.TransferTypeId == 2 && transfer.AccountFrom == userAccount.AccountId)
                         {
                             string username = userService.GetUsername(transfer.AccountTo);
                             sender = $"To:{username}";
