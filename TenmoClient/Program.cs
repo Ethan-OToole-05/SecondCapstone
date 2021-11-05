@@ -130,7 +130,6 @@ namespace TenmoClient
             Console.Clear();
             int userId = userService.GetUserId();
             decimal balance = accountService.ViewBalance(userId);
-            //UI NEEDED LATER.
             Console.WriteLine($"Your current account balance is ${balance}.");
         }
 
@@ -176,7 +175,7 @@ namespace TenmoClient
 
             Console.WriteLine("Enter ID of user you are sending to (0 to cancel)");
 
-            int userToSendId = -1;
+            int userToSendId;
             string intToParse = Console.ReadLine();
             if (!int.TryParse(intToParse, out userToSendId))
             {
@@ -189,7 +188,7 @@ namespace TenmoClient
             else
             {
                 Console.WriteLine("Enter amount");
-                decimal amountToSend = -1;
+                decimal amountToSend;
                 string decimalToParse = Console.ReadLine();
                 if (!decimal.TryParse(decimalToParse, out amountToSend))
                 {
