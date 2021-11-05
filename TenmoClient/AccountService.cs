@@ -10,10 +10,10 @@ namespace TenmoClient
         private readonly static string API_BASE_URL = "https://localhost:44315/";
         private readonly IRestClient client = new RestClient();
 
-        public Account ViewBalance(Account account)
+        public decimal ViewBalance(int userId)
         {
-            RestRequest request = new RestRequest(API_BASE_URL + "api/account/balance/" + $"{account.AccountId}");
-            IRestResponse<Account> response = client.Get<Account>(request);
+            RestRequest request = new RestRequest(API_BASE_URL + "api/account/balance/" + $"{userId}");
+            IRestResponse<decimal> response = client.Get<decimal>(request);
             //Error handling goes here.
             //Only return the balance.
             return response.Data;

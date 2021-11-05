@@ -9,6 +9,15 @@
         public string Email { get; set; }
     }
 
+    public class FrontEndUser
+    {
+        public int UserId { get; set; }
+
+        public string Username { get; set; }
+
+
+    }
+
     /// <summary>
     /// Model to return upon successful login
     /// </summary>

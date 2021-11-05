@@ -45,6 +45,31 @@ namespace TenmoServer.DAO
             return returnUser;
         }
 
+        public string GetUsername(int accountId)
+        {
+            string username = "";
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+                    SqlCommand cmd = new SqlCommand("SELECT username from users join accounts on accounts.user_id = users.user_id where account_id = @account_id", conn);
+                    cmd.Parameters.AddWithValue("@account_id", accountId);
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+
+                    while(reader.Read())
+                    {
+                        username = Convert.ToString(reader["username"]);
+                    }
+                }
+            } catch (SqlException)
+            {
+                throw;
+            }
+            return username;
+        }
+
         public List<User> GetUsers()
         {
             List<User> returnUsers = new List<User>();
@@ -61,6 +86,33 @@ namespace TenmoServer.DAO
                     while (reader.Read())
                     {
                         User u = GetUserFromReader(reader);
+                        returnUsers.Add(u);
+                    }
+                }
+            }
+            catch (SqlException)
+            {
+                throw;
+            }
+
+            return returnUsers;
+        }
+        public List<FrontEndUser> GetAllUsers()
+        {
+            List<FrontEndUser> returnUsers = new List<FrontEndUser>();
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
+                    SqlCommand cmd = new SqlCommand("SELECT user_id, username FROM users", conn);
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        FrontEndUser u = GetUserInfoFromReader(reader);
                         returnUsers.Add(u);
                     }
                 }
@@ -115,6 +167,16 @@ namespace TenmoServer.DAO
                 Username = Convert.ToString(reader["username"]),
                 PasswordHash = Convert.ToString(reader["password_hash"]),
                 Salt = Convert.ToString(reader["salt"]),
+            };
+
+            return u;
+        }
+        private FrontEndUser GetUserInfoFromReader(SqlDataReader reader)
+        {
+            FrontEndUser u = new FrontEndUser()
+            {
+                UserId = Convert.ToInt32(reader["user_id"]),
+                Username = Convert.ToString(reader["username"]),
             };
 
             return u;

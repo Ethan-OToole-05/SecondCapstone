@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -8,8 +9,11 @@ using TenmoServer.Models;
 
 namespace TenmoServer.Controllers
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class UserController
     {
+       
         //Get single user
         private readonly IUserDAO userDAO;
 
@@ -17,9 +21,10 @@ namespace TenmoServer.Controllers
         {
             userDAO = _userDAO;
         }
-        public List<User> GetAllUsers()
+    [HttpGet]
+        public List<FrontEndUser> GetAllUsers()
         {
-            List<User> Users = userDAO.GetUsers();
+            List<FrontEndUser> Users = userDAO.GetAllUsers();
             if(Users.Count > 0)
             {
                 return Users;
@@ -29,5 +34,19 @@ namespace TenmoServer.Controllers
                 throw new HttpRequestException("Error Occured.");
             }
         }
+        [HttpGet("{accountId}")]
+        public string GetUsername(int accountId)
+        {
+            string username = userDAO.GetUsername(accountId);
+            if(username == "")
+            {
+                throw new HttpRequestException("Error occured could not get username.");
+            }
+            else
+            {
+                return username;
+            }
+        }
     }
+   
 }
