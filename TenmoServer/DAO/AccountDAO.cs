@@ -19,7 +19,7 @@ namespace TenmoServer.DAO
             connectionString = dbConnectionString;
         }
 
-        public Account GetAccountId(int accountId)
+        public Account GetAccountByUserId(int userId)
         {
             Account account = new Account();
             try
@@ -29,8 +29,8 @@ namespace TenmoServer.DAO
 
                     conn.Open();
 
-                    SqlCommand cmd = new SqlCommand("SELECT account_id, user_id, balance from accounts where account_id = @account_id", conn);
-                    cmd.Parameters.AddWithValue("@account_id", accountId);
+                    SqlCommand cmd = new SqlCommand("SELECT account_id, user_id, balance from accounts where user_id = @user_id", conn);
+                    cmd.Parameters.AddWithValue("@user_id", userId);
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     while (reader.Read())
@@ -83,7 +83,7 @@ namespace TenmoServer.DAO
             }
             return account;
         }
-        public bool UpdateBalance(decimal updatedBalance, int userId)
+        public bool UpdateBalance(Account updatedAccount, int userId)
         {
             try
             {
@@ -92,7 +92,7 @@ namespace TenmoServer.DAO
                     conn.Open();
 
                     SqlCommand cmd = new SqlCommand("UPDATE accounts SET balance = @balance where user_id = @user_id", conn);
-                    cmd.Parameters.AddWithValue("@balance", updatedBalance);
+                    cmd.Parameters.AddWithValue("@balance", updatedAccount.Balance);
                     cmd.Parameters.AddWithValue("@user_id", userId);
 
                     int rowsAffected = cmd.ExecuteNonQuery();

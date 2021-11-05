@@ -13,9 +13,9 @@ namespace TenmoServer.Controllers
     [ApiController]
     public class TransfersController : ControllerBase
     {
-        private readonly ITransferDao transferDao;
+        private readonly ITransferDAO transferDao;
         
-        public TransfersController(ITransferDao _transferDao)
+        public TransfersController(ITransferDAO _transferDao)
         {
             transferDao = _transferDao;
         }
