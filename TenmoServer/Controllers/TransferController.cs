@@ -24,7 +24,7 @@ namespace TenmoServer.Controllers
         public List<Transfer> GetTransfersByUser(int userId)
         {
             List<Transfer> transfers = transferDao.ListByUser(userId, false);
-            if (transfers.Count > 0)
+            if (transfers.Count >= 0)
             {
                 return transfers;
             }
@@ -73,6 +73,30 @@ namespace TenmoServer.Controllers
             }
     
             return result;
+        }
+        [HttpPut("{transferId}")]
+        public ActionResult<Transfer> UpdateTransferStatus(Transfer updatedTransfer, int transferId)
+        {
+            bool result = false;
+            Transfer existingTransfer = transferDao.GetTransferById(transferId);
+            if (existingTransfer != null)
+            {
+                updatedTransfer.Id = existingTransfer.Id;
+                updatedTransfer.TransferTypeId = existingTransfer.TransferTypeId;
+                updatedTransfer.AccountFrom = existingTransfer.AccountFrom;
+                updatedTransfer.AccountTo = existingTransfer.AccountTo;
+                updatedTransfer.Amount = existingTransfer.Amount;
+
+                result = transferDao.UpdateStatus(updatedTransfer);
+
+            }
+            if(result)
+            {
+                return Ok();
+            } else
+            {
+                return StatusCode(500);
+            }
         }
     }
 }
