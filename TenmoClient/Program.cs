@@ -92,87 +92,124 @@ namespace TenmoClient
                 }
                 else if (menuSelection == 1)
                 {
-                    
-                    decimal balance = accountService.ViewBalance(userService.GetUserId());
-                    //UI NEEDED LATER.
-                    Console.WriteLine($"Your current account balance is ${balance}.");
+                    viewBalance();
                 }
                 else if (menuSelection == 2)
                 {
-                    List<Transfer> transferList = transferService.GetUsersTransfers(userService.GetUserId());
-                    Console.WriteLine("---------------------");
-                    Console.WriteLine("Transfers");
-                    Console.WriteLine("ID        From/To           Amount");
-                    Console.WriteLine("----------------------");
-                    foreach (Transfer transfer in transferList)
-                    {
-                        string sender = "";
-                        if(transfer.TransferTypeId == 2)
-                        {
-                            string username = userService.GetUsername(transfer.AccountTo);
-                            sender = $"To:{username}";
-                        } else
-                        {
-                            string username = userService.GetUsername(transfer.AccountFrom);
-                            sender = $"From:{username}";
-                        }
-                        Console.WriteLine($"{transfer.Id}       {sender}        ${transfer.Amount}");
-
-                    }
+                    viewPastTransfers();
                 }
                 else if (menuSelection == 3)
                 {
-
+                    //viewPendingTransfers();
                 }
                 else if (menuSelection == 4)
                 {
-                    List<User> userList = userService.GetAllUsers();
-                    bool result = false;
-                    foreach(User user in userList)
-                    {
-                        Console.WriteLine($"{user.UserId}      {user.Username}");
-                    }
-                    Console.WriteLine("Enter ID of user you are sending to (0 to cancel)");
-                    int userToSendId = -1;
-                    if (!int.TryParse(Console.ReadLine(), out userToSendId)) 
-                    {
-                        Console.WriteLine("Invalid input.");
-                    } else
-                    { 
-                        Console.WriteLine("Enter amount");
-                        decimal amountToSend = -1;
-                        if (!decimal.TryParse(Console.ReadLine(), out amountToSend))
-                        {
-                            Console.WriteLine("Invalid input.");
-                        } else
-                        {
-                            result = transferService.SendTransfer(userService.GetUserId(), userToSendId, amountToSend);
-                            
-                        }
-                        if(result)
-                        {
-                            Console.WriteLine("Transfer Successful.");
-                        } else
-                        {
-                            Console.WriteLine("Transfer Failed");
-                        }
-                        
-                    }
+                    sendBucks();
                 }
                 else if (menuSelection == 5)
                 {
-
+                    //requestBucks();
                 }
                 else if (menuSelection == 6)
                 {
+                    Console.Clear();
                     Console.WriteLine("");
                     UserService.SetLogin(new ApiUser()); //wipe out previous login info
                     Run(); //return to entry point
                 }
                 else
                 {
+                    Console.Clear();
                     Console.WriteLine("Goodbye!");
                     Environment.Exit(0);
+                }
+            }
+        }
+        private static void viewBalance()
+        {
+            Console.Clear();
+            int userId = userService.GetUserId();
+            decimal balance = accountService.ViewBalance(userId);
+            Console.WriteLine($"Your current account balance is ${balance}.");
+        }
+
+        private static void viewPastTransfers()
+        {
+            Console.Clear();
+            List<Transfer> transferList = transferService.GetUsersTransfers(userService.GetUserId());
+            Account userAccount = accountService.GetAccount(userService.GetUserId());
+            Console.WriteLine("---------------------");
+            Console.WriteLine("Transfers");
+            Console.WriteLine("ID        From/To           Amount");
+            Console.WriteLine("----------------------");
+            foreach (Transfer transfer in transferList)
+            {
+                string sender;
+                if (transfer.TransferTypeId == 2 && transfer.AccountFrom == userAccount.AccountId)
+                {
+                    string username = userService.GetUsername(transfer.AccountTo);
+                    sender = $"To: {username}";
+                }
+                else
+                {
+                    string username = userService.GetUsername(transfer.AccountFrom);
+                    sender = $"From: {username}";
+                }
+                Console.WriteLine($"{transfer.Id}       {sender}        ${transfer.Amount}");
+            }
+        }
+
+        private static void sendBucks()
+        {
+            Console.Clear();
+            List<User> userList = userService.GetAllUsers();
+            bool result = false;
+
+            foreach (User user in userList)
+            {
+                if (user.UserId != userService.GetUserId())
+                {
+                    Console.WriteLine($"{user.UserId}      {user.Username}");
+                }
+            }
+
+            Console.WriteLine("Enter ID of user you are sending to (0 to cancel)");
+
+            int userToSendId;
+            string intToParse = Console.ReadLine();
+            if (!int.TryParse(intToParse, out userToSendId))
+            {
+                Console.WriteLine("Invalid input.");
+            }
+            else if (int.Parse(intToParse) == 0)
+            {
+                return;
+            }
+            else
+            {
+                Console.WriteLine("Enter amount");
+                decimal amountToSend;
+                string decimalToParse = Console.ReadLine();
+                if (!decimal.TryParse(decimalToParse, out amountToSend))
+                {
+                    Console.WriteLine("Invalid input.");
+                }
+                else if (decimal.Parse(decimalToParse) <= 0)
+                {
+                    Console.WriteLine("You cannot send any less than .01 dollars (one cent).");
+                }
+                else
+                {
+                    result = transferService.SendTransfer(userService.GetUserId(), userToSendId, amountToSend);
+                }
+
+                if (result)
+                {
+                    Console.WriteLine("Transfer Successful.");
+                }
+                else
+                {
+                    Console.WriteLine("Transfer Failed");
                 }
             }
         }
