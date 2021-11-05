@@ -52,9 +52,9 @@ namespace TenmoServer.DAO
             }
             return account;
         }
-        public Account GetBalance(int userId)
+        public decimal GetBalance(int userId)
         {
-            Account account = new Account();
+            decimal balance = -1;
             try
             {
                 using (SqlConnection conn = new SqlConnection(connectionString))
@@ -62,26 +62,21 @@ namespace TenmoServer.DAO
 
                     conn.Open();
 
-                    SqlCommand cmd = new SqlCommand("SELECT account_id, user_id, balance from accounts where user_id = @user_id", conn);
+                    SqlCommand cmd = new SqlCommand("SELECT balance from accounts where user_id = @user_id", conn);
                     cmd.Parameters.AddWithValue("@user_id", userId);
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     while (reader.Read())
                     {
-
-                        account.AccountId = Convert.ToInt32(reader["account_id"]);
-                        account.UserId = Convert.ToInt32(reader["user_id"]);
-                        account.Balance = Convert.ToDecimal(reader["balance"]);
-
+                        balance = Convert.ToDecimal(reader["balance"]);
                     }
-
                 }
             }
             catch(SqlException)
             {
                 throw;
             }
-            return account;
+            return balance;
         }
         public bool UpdateBalance(Account updatedAccount, int userId)
         {
