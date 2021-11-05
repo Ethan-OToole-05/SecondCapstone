@@ -4,7 +4,7 @@ using System.Text;
 
 namespace TenmoClient
 {
-    class TransferService
+    public class TransferService
     {
     }
 }
