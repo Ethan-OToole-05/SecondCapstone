@@ -11,5 +11,6 @@ namespace TenmoServer.DAO
         List<Transfer> ListByUser(int userId, bool pending);
         Transfer GetTransferById(int id);
         Transfer Create(Transfer transfer);
+        bool UpdateStatus(Transfer transfer);
     }
 }

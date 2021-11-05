@@ -21,13 +21,14 @@ namespace TenmoClient
                 Console.WriteLine("Cannot send less money than is currently available.");
                 return false;
             }
-
+            request = new RestRequest(API_BASE_URL + "api/account/user/" + $"{receivingUserId}");
+            IRestResponse<Account> receivingAccountResponse = client.Get<Account>(request);
             Transfer newTransfer = new Transfer()
             {
                 TransferStatusId = 2,
                 TransferTypeId = 2,
-                AccountFrom = sendingUserId,
-                AccountTo = receivingUserId,
+                AccountFrom = accountResponse.Data.AccountId,
+                AccountTo = receivingAccountResponse.Data.AccountId,
                 Amount = amount
             };
 
@@ -65,8 +66,7 @@ namespace TenmoClient
                 }
                 else
                 {
-                    request = new RestRequest(API_BASE_URL + "api/account/user/" + $"{receivingUserId}");
-                    IRestResponse<Account> receivingAccountResponse = client.Get<Account>(request);
+                    
                     //Error handle response above
                     receivingAccountResponse.Data.Balance += amount;
                     request = new RestRequest(API_BASE_URL + "api/account/balance/" + $"{receivingUserId}");
@@ -93,14 +93,14 @@ namespace TenmoClient
 
         public Transfer RequestTransfer(Transfer transfer)
         {
-            //TODO;
+            return null;
         }
 
         public List<Transfer> GetUsersTransfers(int userId)
         {
             RestRequest request = new RestRequest(API_BASE_URL + "api/transfers/user/" + $"{userId}");
             IRestResponse<List<Transfer>> response = client.Get<List<Transfer>>(request);
-            if (response.Data.Count > 0)
+            if (response.Data.Count < 0)
             {
                 Console.WriteLine("Could not find any transfers for the given Id.");
                 return null;
@@ -143,7 +143,19 @@ namespace TenmoClient
 
         public Transfer UpdateTransferStatus(int transferId, int updatedStatusId)
         {
-            //TODO;
+            RestRequest request = new RestRequest(API_BASE_URL + "api/transfers/" + $"{transferId}");
+            Transfer transfer = new Transfer() { TransferStatusId = updatedStatusId };
+            request.AddJsonBody(transfer);
+            IRestResponse<Transfer> response = client.Put<Transfer>(request);
+            if(response.Data == null)
+            {
+                Console.WriteLine("Could not update the transfer");
+                return null;
+            }
+            else
+            {
+                return response.Data;
+            }
         }
     }
 }
