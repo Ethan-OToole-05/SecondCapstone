@@ -18,7 +18,7 @@ namespace TenmoClient
             IRestResponse<Account> accountResponse = client.Get<Account>(request);
             if (accountResponse.Data.Balance < amount)
             {
-                Console.WriteLine("Cannot send less money than is currently available.");
+                Console.WriteLine("Cannot send more money than is currently available.");
                 return false;
             }
 
@@ -51,7 +51,7 @@ namespace TenmoClient
                 accountResponse.Data.Balance -= amount;
                 request = new RestRequest(API_BASE_URL + "api/account/balance/" + $"{sendingUserId}");
                 request.AddJsonBody(accountResponse.Data);
-                IRestResponse sendingAccountResponse = client.Put<Account>(request);
+                IRestResponse<Account> sendingAccountResponse = client.Put<Account>(request);
                 if (sendingAccountResponse.ResponseStatus != ResponseStatus.Completed)
                 {
                     Console.WriteLine("An error occurred communicating with the server.");
