@@ -63,10 +63,16 @@ namespace TenmoServer.Controllers
         }
 
         [HttpPost]
-        public ActionResult<Transfer> CreateTransfer(Transfer transfer)
+        public IActionResult CreateTransfer(Transfer transfer)
         {
+            IActionResult result = BadRequest(new { message = "Could not process transfer." });
             Transfer createdTransfer = transferDao.Create(transfer);
-            return Created($"/{transfer.Id}", createdTransfer);
+            if (createdTransfer != null)
+            {
+                result = Created($"/{transfer.Id}", createdTransfer);
+            }
+    
+            return result;
         }
     }
 }

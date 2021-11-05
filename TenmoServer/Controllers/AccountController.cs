@@ -21,7 +21,7 @@ namespace TenmoServer.Controllers
             accountDAO = _accountDAO;
         }
         [HttpGet("user/{userId}")]
-        public ActionResult<Account> GetAccount(int userId)
+        public Account GetAccount(int userId)
         {
             Account account = accountDAO.GetAccountByUserId(userId);
             if (account != null)
@@ -34,12 +34,12 @@ namespace TenmoServer.Controllers
             }
         }
         [HttpGet("balance/{userId}")]
-        public ActionResult<Account> GetBalance(int userId)
+        public decimal GetBalance(int userId)
         {
-            Account account = accountDAO.GetBalance(userId);
-            if (account != null)
+            decimal balance = accountDAO.GetBalance(userId);
+            if (balance >= 0)
             {
-                return account;
+                return balance;
             }
             else
             {
