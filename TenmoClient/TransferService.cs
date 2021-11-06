@@ -137,11 +137,11 @@ namespace TenmoClient
             }
         }
 
-        public List<Transfer> GetUsersTransfers(int userId)
+        public List<Transfer> GetTransfersByUserId(int userId)
         {
             RestRequest request = new RestRequest(API_BASE_URL + "api/transfers/user/" + $"{userId}");
             IRestResponse<List<Transfer>> response = client.Get<List<Transfer>>(request);
-            if (response.Data.Count < 0)
+            if (response.Data.Count <= 0)
             {
                 Console.WriteLine("Could not find any transfers for the given Id.");
                 return null;
