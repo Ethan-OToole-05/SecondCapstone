@@ -177,20 +177,26 @@ namespace TenmoClient
             }
         }
 
-        public Transfer UpdateTransferStatus(int transferId, int updatedStatusId)
+        public bool UpdateTransferStatus(int transferId, int updatedStatusId)
         {
             RestRequest request = new RestRequest(API_BASE_URL + "api/transfers/" + $"{transferId}");
             Transfer transfer = new Transfer() { TransferStatusId = updatedStatusId };
             request.AddJsonBody(transfer);
             IRestResponse<Transfer> response = client.Put<Transfer>(request);
-            if(response.Data == null)
+            if (response.ResponseStatus != ResponseStatus.Completed)
             {
-                Console.WriteLine("Could not update the transfer");
-                return null;
+                Console.WriteLine("An error occurred communicating with the server.");
+                return false;
+            }
+            else if (!response.IsSuccessful)
+            {
+
+                Console.WriteLine("An error response was received from the server. The status code is " + (int)response.StatusCode);
+                return false;
             }
             else
             {
-                return response.Data;
+                return true;
             }
         }
     }

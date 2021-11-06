@@ -20,6 +20,21 @@ namespace TenmoServer.Controllers
         {
             accountDAO = _accountDAO;
         }
+
+        [HttpGet("{accountId}")]
+        public Account GetAccountByAccountId(int accountId)
+        {
+            Account account = accountDAO.GetAccountByAccountId(accountId);
+            if (account != null)
+            {
+                return account;
+            }
+            else
+            {
+                throw new HttpRequestException("Error occured: Coudl not locate account.");
+            }
+        }
+
         [HttpGet("user/{userId}")]
         public Account GetAccount(int userId)
         {

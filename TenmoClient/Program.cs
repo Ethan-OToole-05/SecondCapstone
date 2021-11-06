@@ -146,7 +146,7 @@ namespace TenmoClient
             foreach (Transfer transfer in transferList)
             {
                 string sender;
-                if (transfer.TransferTypeId == 2 && transfer.AccountFrom == userAccount.AccountId)
+                if (transfer.AccountFrom == userAccount.AccountId)
                 {
                     string username = userService.GetUsername(transfer.AccountTo);
                     sender = $"To: {username}";
@@ -160,10 +160,50 @@ namespace TenmoClient
             }
         }
 
+        private static void selectPastTransfer()
+        {
+            Transfer pastTransfer;
+            Console.Write("Please enter a transfer ID you would like to complete or deny: ");
+            int inputId;
+            if (!int.TryParse(Console.ReadLine(), out inputId))
+            {
+                Console.WriteLine("Invalid input. Please enter only a number.");
+            }
+            else if (transferService.GetTransferDetails(inputId) == null)
+            {
+                Console.WriteLine("Invalid ID, please submit a valid transfer ID.");
+            }
+            else
+            {
+                pastTransfer = transferService.GetTransferDetails(inputId);
+                Console.Write("Would you like to (A)pprove or (R)eject the transfer? ");
+                string response = Console.ReadLine();
+                if (response.ToLower().StartsWith('a'))
+                {
+                    bool updated = transferService.UpdateTransferStatus(inputId, 2);
+                    bool approved = accountService.Approve(pastTransfer.Amount, pastTransfer.AccountFrom, pastTransfer.AccountTo);
+                    if (approved && updated)
+                    {
+                        Console.WriteLine("The transfer has been accepted.");
+                    }
+                } 
+                else
+                {
+                    transferService.UpdateTransferStatus(inputId, 3);
+
+                    Console.WriteLine("The transfer has been denied.");
+                }
+            }
+        }
+
         private static void viewPendingTransfers()
         {
             Console.Clear();
             List<Transfer> transferList = transferService.GetPendingTransfers(userService.GetUserId());
+            if (transferList == null)
+            {
+                return;
+            }
             Account userAccount = accountService.GetAccount(userService.GetUserId());
             Console.WriteLine("---------------------");
             Console.WriteLine("Transfers");
@@ -172,7 +212,7 @@ namespace TenmoClient
             foreach (Transfer transfer in transferList)
             {
                 string sender;
-                if (transfer.TransferTypeId == 2 && transfer.AccountFrom == userAccount.AccountId)
+                if (transfer.AccountFrom == userAccount.AccountId)
                 {
                     string username = userService.GetUsername(transfer.AccountTo);
                     sender = $"To: {username}";
@@ -184,6 +224,8 @@ namespace TenmoClient
                 }
                 Console.WriteLine($"{transfer.Id}       {sender}        ${transfer.Amount}");
             }
+
+            selectPastTransfer();
         }
 
         private static void sendBucks()
