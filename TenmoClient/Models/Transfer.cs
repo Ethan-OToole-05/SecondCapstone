@@ -27,6 +27,5 @@ namespace TenmoClient.Models
             AccountTo = accountTo;
             Amount = amount;
         }
-
     }
 }

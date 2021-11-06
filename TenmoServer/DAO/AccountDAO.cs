@@ -19,6 +19,32 @@ namespace TenmoServer.DAO
             connectionString = dbConnectionString;
         }
 
+        public Account GetAccountByAccountId(int accountId)
+        {
+            Account account = new Account();
+            try
+            {
+                using(SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
+                    SqlCommand cmd = new SqlCommand("SELECT account_id, user_id, balance FROM accounts WHERE account_id = @account_id", conn);
+                    cmd.Parameters.AddWithValue("@account_id", accountId);
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        account.AccountId = Convert.ToInt32(reader["account_id"]);
+                        account.UserId = Convert.ToInt32(reader["user_id"]);
+                        account.Balance = Convert.ToDecimal(reader["balance"]);
+                    }
+                }
+            } catch (SqlException)
+            {
+                throw;
+            }
+            return account;
+        }
         public Account GetAccountByUserId(int userId)
         {
             Account account = new Account();
@@ -41,10 +67,7 @@ namespace TenmoServer.DAO
                         account.Balance = Convert.ToDecimal(reader["balance"]);
 
                     }
-
-
                 }
-
             }
             catch(SqlException)
             {

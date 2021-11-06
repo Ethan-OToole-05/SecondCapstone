@@ -54,7 +54,7 @@ namespace TenmoClient
             return !string.IsNullOrWhiteSpace(user.Token);
         }
 
-        public static string GetToken()
+        public string GetToken()
         {
             return user?.Token ?? string.Empty;
         }

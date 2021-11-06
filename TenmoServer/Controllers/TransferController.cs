@@ -38,7 +38,7 @@ namespace TenmoServer.Controllers
         public List<Transfer> GetPendingTransfersByUser(int userId)
         {
             List<Transfer> transfers = transferDao.ListByUser(userId, true);
-            if (transfers.Count > 0)
+            if (transfers.Count >= 0)
             {
                 return transfers;
             }
