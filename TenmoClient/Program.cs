@@ -100,7 +100,7 @@ namespace TenmoClient
                 }
                 else if (menuSelection == 3)
                 {
-                    //viewPendingTransfers();
+                    viewPendingTransfers();
                 }
                 else if (menuSelection == 4)
                 {
@@ -108,7 +108,8 @@ namespace TenmoClient
                 }
                 else if (menuSelection == 5)
                 {
-                    //requestBucks();
+                    requestBucks();
+
                 }
                 else if (menuSelection == 6)
                 {
@@ -137,6 +138,32 @@ namespace TenmoClient
         {
             Console.Clear();
             List<Transfer> transferList = transferService.GetUsersTransfers(userService.GetUserId());
+            Account userAccount = accountService.GetAccount(userService.GetUserId());
+            Console.WriteLine("---------------------");
+            Console.WriteLine("Transfers");
+            Console.WriteLine("ID        From/To           Amount");
+            Console.WriteLine("----------------------");
+            foreach (Transfer transfer in transferList)
+            {
+                string sender;
+                if (transfer.TransferTypeId == 2 && transfer.AccountFrom == userAccount.AccountId)
+                {
+                    string username = userService.GetUsername(transfer.AccountTo);
+                    sender = $"To: {username}";
+                }
+                else
+                {
+                    string username = userService.GetUsername(transfer.AccountFrom);
+                    sender = $"From: {username}";
+                }
+                Console.WriteLine($"{transfer.Id}       {sender}        ${transfer.Amount}");
+            }
+        }
+
+        private static void viewPendingTransfers()
+        {
+            Console.Clear();
+            List<Transfer> transferList = transferService.GetPendingTransfers(userService.GetUserId());
             Account userAccount = accountService.GetAccount(userService.GetUserId());
             Console.WriteLine("---------------------");
             Console.WriteLine("Transfers");
@@ -201,6 +228,61 @@ namespace TenmoClient
                 else
                 {
                     result = transferService.SendTransfer(userService.GetUserId(), userToSendId, amountToSend);
+                }
+
+                if (result)
+                {
+                    Console.WriteLine("Transfer Successful.");
+                }
+                else
+                {
+                    Console.WriteLine("Transfer Failed");
+                }
+            }
+        }
+
+        private static void requestBucks()
+        {
+            Console.Clear();
+            List<User> userList = userService.GetAllUsers();
+            bool result = false;
+
+            foreach (User user in userList)
+            {
+                if (user.UserId != userService.GetUserId())
+                {
+                    Console.WriteLine($"{user.UserId}      {user.Username}");
+                }
+            }
+
+            Console.WriteLine("Enter ID of user you are requesting from (0 to cancel)");
+
+            int userToRequestId;
+            string intToParse = Console.ReadLine();
+            if (!int.TryParse(intToParse, out userToRequestId))
+            {
+                Console.WriteLine("Invalid input.");
+            }
+            else if (int.Parse(intToParse) == 0)
+            {
+                return;
+            }
+            else
+            {
+                Console.WriteLine("Enter amount");
+                decimal amountToRequest;
+                string decimalToParse = Console.ReadLine();
+                if (!decimal.TryParse(decimalToParse, out amountToRequest))
+                {
+                    Console.WriteLine("Invalid input.");
+                }
+                else if (decimal.Parse(decimalToParse) <= 0)
+                {
+                    Console.WriteLine("You cannot request any less than .01 dollars (one cent).");
+                }
+                else
+                {
+                    result = transferService.RequestTransfer(userService.GetUserId(), userToRequestId, amountToRequest);
                 }
 
                 if (result)

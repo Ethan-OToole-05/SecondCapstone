@@ -13,7 +13,6 @@ namespace TenmoClient
 
         public bool SendTransfer(int sendingUserId, int receivingUserId, decimal amount)
         {
-
             RestRequest request = new RestRequest(API_BASE_URL + "api/account/user/" + $"{sendingUserId}");
             IRestResponse<Account> accountResponse = client.Get<Account>(request);
             if (accountResponse.Data.Balance < amount)
@@ -91,9 +90,46 @@ namespace TenmoClient
             }
         }
 
-        public Transfer RequestTransfer(Transfer transfer)
+        public bool RequestTransfer(int requestingUserId, int receivingUserId, decimal amount)
         {
-            return null;
+            RestRequest request = new RestRequest(API_BASE_URL + "api/account/user/" + $"{requestingUserId}");
+            IRestResponse<Account> accountResponse = client.Get<Account>(request);
+            request = new RestRequest(API_BASE_URL + "api/account/user/" + $"{receivingUserId}");
+            IRestResponse<Account> receivingAccountResponse = client.Get<Account>(request);
+            if (receivingAccountResponse.Data.Balance < amount)
+            {
+                Console.WriteLine("Cannot request more money than they currently have available.");
+                return false;
+            }
+
+            Transfer newTransfer = new Transfer()
+            {
+                TransferStatusId = 1,
+                TransferTypeId = 1,
+                AccountFrom = receivingAccountResponse.Data.AccountId,
+                AccountTo = accountResponse.Data.AccountId,
+                Amount = amount
+            };
+
+            request = new RestRequest(API_BASE_URL + "api/transfers");
+            request.AddJsonBody(newTransfer);
+            IRestResponse<Transfer> response = client.Post<Transfer>(request);
+
+            if (response.ResponseStatus != ResponseStatus.Completed)
+            {
+                Console.WriteLine("An error occurred communicating with the server.");
+                return false;
+            }
+            else if (!response.IsSuccessful)
+            {
+
+                Console.WriteLine("An error response was received from the server. The status code is " + (int)response.StatusCode);
+                return false;
+            }
+            else
+            {
+                return true;
+            }
         }
 
         public List<Transfer> GetUsersTransfers(int userId)
@@ -115,7 +151,7 @@ namespace TenmoClient
         {
             RestRequest request = new RestRequest(API_BASE_URL + "api/transfers/user/" + $"{userId}/" + "pending");
             IRestResponse<List<Transfer>> response = client.Get<List<Transfer>>(request);
-            if (response.Data.Count > 0)
+            if (response.Data.Count <= 0)
             {
                 Console.WriteLine("Could not find any pending transfers for the given Id.");
                 return null;

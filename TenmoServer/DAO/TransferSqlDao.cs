@@ -31,7 +31,7 @@ namespace TenmoServer.DAO
                     
                     if (pending)
                     {
-                        cmd = new SqlCommand("SELECT transfer_id, transfer_type_id, transfer_status_id, account_from, account_to, amount FROM transfers JOIN accounts ON account_from = accounts.account_id WHERE user_id = @user_id AND transfer_status_id = 1", conn);
+                        cmd = new SqlCommand("SELECT transfer_id, transfer_type_id, transfer_status_id, account_from, account_to, amount FROM transfers JOIN accounts ON account_from = accounts.account_id OR account_to = accounts.account_id WHERE user_id = @user_id AND transfer_status_id = 1 AND account_to = (SELECT account_id FROM accounts WHERE user_id = @user_id)", conn);
                     }
 
                     cmd.Parameters.AddWithValue("@user_id", userId);
