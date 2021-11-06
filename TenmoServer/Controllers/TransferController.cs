@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,7 @@ namespace TenmoServer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class TransfersController : ControllerBase
     {
         private readonly ITransferDAO transferDao;
@@ -58,7 +60,7 @@ namespace TenmoServer.Controllers
             }
             else
             {
-                throw new HttpRequestException("Error Occurred: Could not locate transfer.");
+                return null;
             }
         }
 

@@ -7,11 +7,13 @@ using TenmoServer.Security;
 using TenmoServer.DAO;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http;
+using Microsoft.AspNetCore.Authorization;
 
 namespace TenmoServer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class AccountController : ControllerBase
     {
         private readonly IAccountDAO accountDAO;
@@ -25,13 +27,13 @@ namespace TenmoServer.Controllers
         public Account GetAccountByAccountId(int accountId)
         {
             Account account = accountDAO.GetAccountByAccountId(accountId);
-            if (account != null)
+            if (account.AccountId != accountId)
             {
-                return account;
+                return null;
             }
             else
             {
-                throw new HttpRequestException("Error occured: Coudl not locate account.");
+                return account;
             }
         }
 
@@ -39,13 +41,13 @@ namespace TenmoServer.Controllers
         public Account GetAccount(int userId)
         {
             Account account = accountDAO.GetAccountByUserId(userId);
-            if (account != null)
+            if (account.UserId != userId)
             {
-                return account;
+                return null;
             }
             else
             {
-                throw new HttpRequestException("Error Occurred: Could not locate account.");
+                return account;
             }
         }
         [HttpGet("balance/{userId}")]
@@ -58,7 +60,7 @@ namespace TenmoServer.Controllers
             }
             else
             {
-                throw new HttpRequestException("Error Occurred: Could not locate balance.");
+                return -1;
             }
 
         }

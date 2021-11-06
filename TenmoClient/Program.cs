@@ -24,7 +24,7 @@ namespace TenmoClient
             int loginRegister = -1;
             while (loginRegister != 1 && loginRegister != 2)
             {
-                Console.WriteLine("Welcome to TEnmo!");
+                Console.WriteLine($"Welcome to TEnmo!");
                 Console.WriteLine("1: Login");
                 Console.WriteLine("2: Register");
                 Console.Write("Please choose an option: ");
@@ -35,13 +35,13 @@ namespace TenmoClient
                 }
                 else if (loginRegister == 1)
                 {
-                    while (!UserService.IsLoggedIn()) //will keep looping until user is logged in
+                    while (!ActiveUserService.IsLoggedIn()) //will keep looping until user is logged in
                     {
                         LoginUser loginUser = consoleService.PromptForLogin();
                         ApiUser user = authService.Login(loginUser);
                         if (user != null)
                         {
-                            UserService.SetLogin(user);
+                            ActiveUserService.SetLogin(user);
                         }
                     }
                 }
@@ -65,7 +65,9 @@ namespace TenmoClient
                     Console.WriteLine("Invalid selection.");
                 }
             }
-
+            accountService.Authenticate();
+            transferService.Authenticate();
+            userService.Authenticate();
             MenuSelection();
         }
 
@@ -75,7 +77,7 @@ namespace TenmoClient
             while (menuSelection != 0)
             {
                 Console.WriteLine("");
-                Console.WriteLine("Welcome to TEnmo! Please make a selection: ");
+                Console.WriteLine($"Welcome to TEnmo {ActiveUserService.GetActiveUsername()}! Please make a selection: ");
                 Console.WriteLine("1: View your current balance");
                 Console.WriteLine("2: View your past transfers");
                 Console.WriteLine("3: View your pending requests");
@@ -115,7 +117,7 @@ namespace TenmoClient
                 {
                     Console.Clear();
                     Console.WriteLine("");
-                    UserService.SetLogin(new ApiUser()); //wipe out previous login info
+                    ActiveUserService.SetLogin(new ApiUser()); //wipe out previous login info
                     Run(); //return to entry point
                 }
                 else
@@ -129,7 +131,7 @@ namespace TenmoClient
         private static void viewBalance()
         {
             Console.Clear();
-            int userId = userService.GetUserId();
+            int userId = ActiveUserService.GetUserId();
             decimal balance = accountService.ViewBalance(userId);
             Console.WriteLine($"Your current account balance is ${balance}.");
         }
@@ -137,8 +139,8 @@ namespace TenmoClient
         private static void viewPastTransfers()
         {
             Console.Clear();
-            List<Transfer> transferList = transferService.GetUsersTransfers(userService.GetUserId());
-            Account userAccount = accountService.GetAccount(userService.GetUserId());
+            List<Transfer> transferList = transferService.GetUsersTransfers(ActiveUserService.GetUserId());
+            Account userAccount = accountService.GetAccount(ActiveUserService.GetUserId());
             Console.WriteLine("---------------------");
             Console.WriteLine("Transfers");
             Console.WriteLine("ID        From/To           Amount");
@@ -158,25 +160,85 @@ namespace TenmoClient
                 }
                 Console.WriteLine($"{transfer.Id}       {sender}        ${transfer.Amount}");
             }
+
+            viewTransferDetails();
+        }
+        private static void viewTransferDetails()
+        {
+            Transfer transferDetails;
+            Console.WriteLine("Please enter the ID of the transfer you want the details of.(press 0 to cancel)");
+            int inputId;
+
+            if (!int.TryParse(Console.ReadLine(), out inputId))
+            {
+                Console.WriteLine("Invaild input. Please enter only a number.");
+            }
+            if (inputId == 0)
+            {
+                return;
+            }
+            else if (transferService.GetTransferDetails(inputId) == null)
+            {
+                Console.WriteLine("Invalid Id, please submit a valid transfer Id.");
+            }
+            
+            else
+            {
+                
+                transferDetails = transferService.GetTransferDetails(inputId);
+                string accountFrom = userService.GetUsername(transferDetails.AccountFrom);
+                string accountTo = userService.GetUsername(transferDetails.AccountTo);
+                string typeTransfer;
+                string typeStatus;
+                if(transferDetails.TransferTypeId == 1)
+                {
+                    typeTransfer = "Request";
+                } else
+                {
+                    typeTransfer = "Send";
+                }
+                if(transferDetails.TransferStatusId == 1)
+                {
+                    typeStatus = "Pending";
+                } else if(transferDetails.TransferStatusId == 2)
+                {
+                    typeStatus = "Approved";
+                }
+                else
+                {
+                    typeStatus = "Rejected";
+                }
+                Console.WriteLine($"Id: {transferDetails.Id}");
+                Console.WriteLine($"From: {accountFrom}");
+                Console.WriteLine($"To:  {accountTo}");
+                Console.WriteLine($"Type: {typeTransfer}");
+                Console.WriteLine($"Status: {typeStatus}");
+                Console.WriteLine($"Amount: ${transferDetails.Amount}");
+            }
         }
 
-        private static void selectPastTransfer()
+        private static void selectPendingTransfer()
         {
             Transfer pastTransfer;
-            Console.Write("Please enter a transfer ID you would like to complete or deny: ");
+            Console.Write("Please enter a transfer ID you would like to Approve or Reject: (press 0 to cancel)");
             int inputId;
             if (!int.TryParse(Console.ReadLine(), out inputId))
             {
                 Console.WriteLine("Invalid input. Please enter only a number.");
             }
+            if (inputId == 0)
+            {
+                return;
+            }
             else if (transferService.GetTransferDetails(inputId) == null)
             {
                 Console.WriteLine("Invalid ID, please submit a valid transfer ID.");
-            }
+            } 
+            
             else
             {
                 pastTransfer = transferService.GetTransferDetails(inputId);
-                Console.Write("Would you like to (A)pprove or (R)eject the transfer? ");
+                Console.Write("Would you like to (A)pprove or (R)eject the transfer? (press any other key to cancel.)");
                 string response = Console.ReadLine();
                 if (response.ToLower().StartsWith('a'))
                 {
@@ -186,12 +248,15 @@ namespace TenmoClient
                     {
                         Console.WriteLine("The transfer has been accepted.");
                     }
-                } 
-                else
+                }
+                else if (response.ToLower().StartsWith('r'))
                 {
                     transferService.UpdateTransferStatus(inputId, 3);
 
                     Console.WriteLine("The transfer has been denied.");
+                } else
+                {
+                    return;
                 }
             }
         }
@@ -199,12 +264,12 @@ namespace TenmoClient
         private static void viewPendingTransfers()
         {
             Console.Clear();
-            List<Transfer> transferList = transferService.GetPendingTransfers(userService.GetUserId());
+            List<Transfer> transferList = transferService.GetPendingTransfers(ActiveUserService.GetUserId());
             if (transferList == null)
             {
                 return;
             }
-            Account userAccount = accountService.GetAccount(userService.GetUserId());
+            Account userAccount = accountService.GetAccount(ActiveUserService.GetUserId());
             Console.WriteLine("---------------------");
             Console.WriteLine("Transfers");
             Console.WriteLine("ID        From/To           Amount");
@@ -225,7 +290,7 @@ namespace TenmoClient
                 Console.WriteLine($"{transfer.Id}       {sender}        ${transfer.Amount}");
             }
 
-            selectPastTransfer();
+            selectPendingTransfer();
         }
 
         private static void sendBucks()
@@ -236,7 +301,7 @@ namespace TenmoClient
 
             foreach (User user in userList)
             {
-                if (user.UserId != userService.GetUserId())
+                if (user.UserId != ActiveUserService.GetUserId())
                 {
                     Console.WriteLine($"{user.UserId}      {user.Username}");
                 }
@@ -253,6 +318,10 @@ namespace TenmoClient
             else if (int.Parse(intToParse) == 0)
             {
                 return;
+            } 
+            if (accountService.GetAccount(userToSendId) == null)
+            {
+                Console.WriteLine("Invalid ID.");
             }
             else
             {
@@ -269,7 +338,7 @@ namespace TenmoClient
                 }
                 else
                 {
-                    result = transferService.SendTransfer(userService.GetUserId(), userToSendId, amountToSend);
+                    result = transferService.SendTransfer(ActiveUserService.GetUserId(), userToSendId, amountToSend);
                 }
 
                 if (result)
@@ -291,7 +360,7 @@ namespace TenmoClient
 
             foreach (User user in userList)
             {
-                if (user.UserId != userService.GetUserId())
+                if (user.UserId != ActiveUserService.GetUserId())
                 {
                     Console.WriteLine($"{user.UserId}      {user.Username}");
                 }
@@ -308,6 +377,10 @@ namespace TenmoClient
             else if (int.Parse(intToParse) == 0)
             {
                 return;
+            } 
+            if (accountService.GetAccount(userToRequestId) == null)
+            {
+                Console.WriteLine("Please enter a valid user id");
             }
             else
             {
@@ -324,16 +397,16 @@ namespace TenmoClient
                 }
                 else
                 {
-                    result = transferService.RequestTransfer(userService.GetUserId(), userToRequestId, amountToRequest);
+                    result = transferService.RequestTransfer(ActiveUserService.GetUserId(), userToRequestId, amountToRequest);
                 }
 
                 if (result)
                 {
-                    Console.WriteLine("Transfer Successful.");
+                    Console.WriteLine("Request Sent.");
                 }
                 else
                 {
-                    Console.WriteLine("Transfer Failed");
+                    Console.WriteLine("Request Failed.");
                 }
             }
         }

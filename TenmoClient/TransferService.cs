@@ -1,4 +1,5 @@
 ﻿using RestSharp;
+using RestSharp.Authenticators;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -11,6 +12,10 @@ namespace TenmoClient
         private readonly static string API_BASE_URL = "https://localhost:44315/";
         private readonly IRestClient client = new RestClient();
 
+        public void Authenticate()
+        {
+            client.Authenticator = new JwtAuthenticator(ActiveUserService.GetToken());
+        }
         public bool SendTransfer(int sendingUserId, int receivingUserId, decimal amount)
         {
             RestRequest request = new RestRequest(API_BASE_URL + "api/account/user/" + $"{sendingUserId}");
@@ -151,6 +156,7 @@ namespace TenmoClient
         {
             RestRequest request = new RestRequest(API_BASE_URL + "api/transfers/user/" + $"{userId}/" + "pending");
             IRestResponse<List<Transfer>> response = client.Get<List<Transfer>>(request);
+
             if (response.Data.Count <= 0)
             {
                 Console.WriteLine("Could not find any pending transfers for the given Id.");
@@ -168,7 +174,6 @@ namespace TenmoClient
             IRestResponse<Transfer> response = client.Get<Transfer>(request);
             if (response.Data == null)
             {
-                Console.WriteLine("Could not find any transfers for the given Id.");
                 return null;
             }
             else
@@ -176,6 +181,7 @@ namespace TenmoClient
                 return response.Data;
             }
         }
+        
 
         public bool UpdateTransferStatus(int transferId, int updatedStatusId)
         {
