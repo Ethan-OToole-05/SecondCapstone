@@ -2,6 +2,7 @@
 using RestSharp;
 using System.Collections.Generic;
 using TenmoClient.Models;
+using RestSharp.Authenticators;
 
 namespace TenmoClient
 {
@@ -9,8 +10,11 @@ namespace TenmoClient
     {
         private readonly static string API_BASE_URL = "https://localhost:44315/";
         private readonly IRestClient client = new RestClient();
-        private static ApiUser user = new ApiUser();
 
+        public void Authenticate()
+        {
+            client.Authenticator = new JwtAuthenticator(ActiveUserService.GetToken());
+        }
         public List<User> GetAllUsers()
         {
             RestRequest request = new RestRequest(API_BASE_URL + "api/user");
@@ -38,25 +42,6 @@ namespace TenmoClient
             {
                 return response.Data;
             }
-        }
-        public static void SetLogin(ApiUser u)
-        {
-            user = u;
-        }
-
-        public int GetUserId()
-        {
-            return user.UserId;
-        }
-
-        public static bool IsLoggedIn()
-        {
-            return !string.IsNullOrWhiteSpace(user.Token);
-        }
-
-        public string GetToken()
-        {
-            return user?.Token ?? string.Empty;
         }
     }
 }

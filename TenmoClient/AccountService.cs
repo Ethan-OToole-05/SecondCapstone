@@ -2,27 +2,41 @@
 using System.Collections.Generic;
 using System.Text;
 using RestSharp;
+using RestSharp.Authenticators;
 using TenmoClient.Models;
+
 namespace TenmoClient
 {
     public class AccountService
     {
         private readonly static string API_BASE_URL = "https://localhost:44315/";
         private readonly IRestClient client = new RestClient();
+        
+        public void Authenticate()
+        {
+            client.Authenticator = new JwtAuthenticator(ActiveUserService.GetToken());
 
+        }
         public decimal ViewBalance(int userId)
         {
             RestRequest request = new RestRequest(API_BASE_URL + "api/account/balance/" + $"{userId}");
             IRestResponse<decimal> response = client.Get<decimal>(request);
-            //Error handling goes here.
-            //Only return the balance.
+            if (response.Data < 0)
+            {
+                return -1;
+            }
+            
             return response.Data;
         }
         public Account GetAccount(int userId)
         {
             RestRequest request = new RestRequest(API_BASE_URL + "api/account/user/" + $"{userId}");
             IRestResponse<Account> response = client.Get<Account>(request);
-            //Error handling goes here.
+            if(response.Data == null)
+            {
+                return null;
+            }
+            
             return response.Data;
         }
 
@@ -30,7 +44,10 @@ namespace TenmoClient
         {
             RestRequest request = new RestRequest(API_BASE_URL + "api/account/" + $"{accountId}");
             IRestResponse<Account> response = client.Get<Account>(request);
-            //Error handle
+            if(response.Data == null)
+            {
+                return null;
+            }
             return response.Data;
         }
 
