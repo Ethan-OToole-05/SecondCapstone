@@ -13,17 +13,16 @@ namespace TenmoServer.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class UserController
+    public class UserController : ControllerBase
     {
-       
-        //Get single user
         private readonly IUserDAO userDAO;
 
         public UserController(IUserDAO _userDAO)
         {
             userDAO = _userDAO;
         }
-    [HttpGet]
+
+        [HttpGet]
         public List<FrontEndUser> GetAllUsers()
         {
             List<FrontEndUser> Users = userDAO.GetAllUsers();
@@ -36,8 +35,9 @@ namespace TenmoServer.Controllers
                 throw new HttpRequestException("Error Occured.");
             }
         }
+
         [HttpGet("{accountId}")]
-        public string GetUsername(int accountId)
+        public string GetUsernameByAccountId(int accountId)
         {
             string username = userDAO.GetUsername(accountId);
             if(username == "")

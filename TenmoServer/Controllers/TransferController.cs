@@ -23,7 +23,7 @@ namespace TenmoServer.Controllers
         }
 
         [HttpGet("user/{userId}")]
-        public List<Transfer> GetTransfersByUser(int userId)
+        public List<Transfer> GetTransfersByUserId(int userId)
         {
             List<Transfer> transfers = transferDao.ListByUser(userId, false);
             if (transfers.Count >= 0)
@@ -37,7 +37,7 @@ namespace TenmoServer.Controllers
         }
 
         [HttpGet("user/{userId}/pending")]
-        public List<Transfer> GetPendingTransfersByUser(int userId)
+        public List<Transfer> GetPendingTransfersByUserId(int userId)
         {
             List<Transfer> transfers = transferDao.ListByUser(userId, true);
             if (transfers.Count >= 0)
@@ -51,7 +51,7 @@ namespace TenmoServer.Controllers
         }
 
         [HttpGet("{transferId}")]
-        public Transfer GetTransferById(int transferId)
+        public Transfer GetTransferByTransferId(int transferId)
         {
             Transfer transfer = transferDao.GetTransferById(transferId);
             if (transfer != null)
@@ -76,6 +76,7 @@ namespace TenmoServer.Controllers
     
             return result;
         }
+
         [HttpPut("{transferId}")]
         public ActionResult<Transfer> UpdateTransferStatus(Transfer updatedTransfer, int transferId)
         {

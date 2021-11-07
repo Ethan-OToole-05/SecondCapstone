@@ -39,16 +39,8 @@ namespace TenmoClient
             request = new RestRequest(API_BASE_URL + "api/transfers");
             request.AddJsonBody(newTransfer);
             IRestResponse<Transfer> response = client.Post<Transfer>(request);
-
-            if (response.ResponseStatus != ResponseStatus.Completed)
+            if (!ErrorHandleResponse(response)) 
             {
-                Console.WriteLine("An error occurred communicating with the server.");
-                return false;
-            }
-            else if (!response.IsSuccessful)
-            {
-
-                Console.WriteLine("An error response was received from the server. The status code is " + (int)response.StatusCode);
                 return false;
             }
             else
@@ -57,34 +49,18 @@ namespace TenmoClient
                 request = new RestRequest(API_BASE_URL + "api/account/balance/" + $"{sendingUserId}");
                 request.AddJsonBody(accountResponse.Data);
                 IRestResponse<Account> sendingAccountResponse = client.Put<Account>(request);
-                if (sendingAccountResponse.ResponseStatus != ResponseStatus.Completed)
+                if (!ErrorHandleResponse(sendingAccountResponse))
                 {
-                    Console.WriteLine("An error occurred communicating with the server.");
-                    return false;
-                }
-                else if (!sendingAccountResponse.IsSuccessful)
-                {
-
-                    Console.WriteLine("An error response was received from the server. The status code is " + (int)response.StatusCode);
                     return false;
                 }
                 else
                 {
-                    
-                    //Error handle response above
                     receivingAccountResponse.Data.Balance += amount;
                     request = new RestRequest(API_BASE_URL + "api/account/balance/" + $"{receivingUserId}");
                     request.AddJsonBody(receivingAccountResponse.Data);
-                    IRestResponse accountReceivedResponse = client.Put<Account>(request);
-                    if (accountReceivedResponse.ResponseStatus != ResponseStatus.Completed)
+                    IRestResponse<Account> accountReceivedResponse = client.Put<Account>(request);
+                    if (!ErrorHandleResponse(accountReceivedResponse))
                     {
-                        Console.WriteLine("An error occurred communicating with the server.");
-                        return false;
-                    }
-                    else if (!accountReceivedResponse.IsSuccessful)
-                    {
-
-                        Console.WriteLine("An error response was received from the server. The status code is " + (int)response.StatusCode);
                         return false;
                     }
                     else
@@ -98,21 +74,16 @@ namespace TenmoClient
         public bool RequestTransfer(int requestingUserId, int receivingUserId, decimal amount)
         {
             RestRequest request = new RestRequest(API_BASE_URL + "api/account/user/" + $"{requestingUserId}");
-            IRestResponse<Account> accountResponse = client.Get<Account>(request);
+            IRestResponse<Account> requestingAccountResponse = client.Get<Account>(request);
             request = new RestRequest(API_BASE_URL + "api/account/user/" + $"{receivingUserId}");
             IRestResponse<Account> receivingAccountResponse = client.Get<Account>(request);
-            if (receivingAccountResponse.Data.Balance < amount)
-            {
-                Console.WriteLine("Cannot request more money than they currently have available.");
-                return false;
-            }
 
             Transfer newTransfer = new Transfer()
             {
                 TransferStatusId = 1,
                 TransferTypeId = 1,
                 AccountFrom = receivingAccountResponse.Data.AccountId,
-                AccountTo = accountResponse.Data.AccountId,
+                AccountTo = requestingAccountResponse.Data.AccountId,
                 Amount = amount
             };
 
@@ -120,15 +91,8 @@ namespace TenmoClient
             request.AddJsonBody(newTransfer);
             IRestResponse<Transfer> response = client.Post<Transfer>(request);
 
-            if (response.ResponseStatus != ResponseStatus.Completed)
+            if (!ErrorHandleResponse(response))
             {
-                Console.WriteLine("An error occurred communicating with the server.");
-                return false;
-            }
-            else if (!response.IsSuccessful)
-            {
-
-                Console.WriteLine("An error response was received from the server. The status code is " + (int)response.StatusCode);
                 return false;
             }
             else
@@ -189,6 +153,18 @@ namespace TenmoClient
             Transfer transfer = new Transfer() { TransferStatusId = updatedStatusId };
             request.AddJsonBody(transfer);
             IRestResponse<Transfer> response = client.Put<Transfer>(request);
+            if (!ErrorHandleResponse(response))
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        private bool ErrorHandleResponse(IRestResponse response)
+        {
             if (response.ResponseStatus != ResponseStatus.Completed)
             {
                 Console.WriteLine("An error occurred communicating with the server.");

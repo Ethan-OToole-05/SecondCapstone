@@ -22,6 +22,7 @@ namespace TenmoServer.DAO
         public Account GetAccountByAccountId(int accountId)
         {
             Account account = new Account();
+
             try
             {
                 using(SqlConnection conn = new SqlConnection(connectionString))
@@ -39,15 +40,18 @@ namespace TenmoServer.DAO
                         account.Balance = Convert.ToDecimal(reader["balance"]);
                     }
                 }
-            } catch (SqlException)
+            } 
+            catch (SqlException e)
             {
-                throw;
+                throw new Exception(e.Message);
             }
+
             return account;
         }
         public Account GetAccountByUserId(int userId)
         {
             Account account = new Account();
+
             try
             {
                 using (SqlConnection conn = new SqlConnection(connectionString))
@@ -69,15 +73,17 @@ namespace TenmoServer.DAO
                     }
                 }
             }
-            catch(SqlException)
+            catch(SqlException e)
             {
-                throw;
+                throw new Exception(e.Message);
             }
+
             return account;
         }
-        public decimal GetBalance(int userId)
+        public decimal GetBalanceByUserId(int userId)
         {
             decimal balance = -1;
+
             try
             {
                 using (SqlConnection conn = new SqlConnection(connectionString))
@@ -95,10 +101,11 @@ namespace TenmoServer.DAO
                     }
                 }
             }
-            catch(SqlException)
+            catch(SqlException e)
             {
-                throw;
+                throw new Exception(e.Message);
             }
+
             return balance;
         }
         public bool UpdateBalance(Account updatedAccount, int userId)
@@ -116,13 +123,12 @@ namespace TenmoServer.DAO
                     int rowsAffected = cmd.ExecuteNonQuery();
 
                     return (rowsAffected > 0);
-
                 }
-            }catch (SqlException)
-            {
-                throw;
             }
-
+            catch (SqlException e)
+            {
+                throw new Exception(e.Message);
+            }
         }
     }
 }

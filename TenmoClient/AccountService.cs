@@ -15,7 +15,6 @@ namespace TenmoClient
         public void Authenticate()
         {
             client.Authenticator = new JwtAuthenticator(ActiveUserService.GetToken());
-
         }
         public decimal ViewBalance(int userId)
         {
@@ -28,7 +27,7 @@ namespace TenmoClient
             
             return response.Data;
         }
-        public Account GetAccount(int userId)
+        public Account GetAccountByUserId(int userId)
         {
             RestRequest request = new RestRequest(API_BASE_URL + "api/account/user/" + $"{userId}");
             IRestResponse<Account> response = client.Get<Account>(request);
@@ -55,20 +54,18 @@ namespace TenmoClient
         {
             Account givingAccount = GetAccountByAccountId(givingAccountId);
             Account receivingAccount = GetAccountByAccountId(receivingAccountId);
+            if (givingAccount.Balance < amount)
+            {
+                Console.WriteLine("Cannot give more money than you currently have available.");
+                return false;
+            }
             givingAccount.Balance -= amount;
             receivingAccount.Balance += amount;
             RestRequest request = new RestRequest(API_BASE_URL + "api/account/balance/" + $"{givingAccount.UserId}");
             request.AddJsonBody(givingAccount);
             IRestResponse<Account> response = client.Put<Account>(request);
-            if (response.ResponseStatus != ResponseStatus.Completed)
+            if (!ErrorHandleResponse(response))
             {
-                Console.WriteLine("An error occurred communicating with the server.");
-                return false;
-            }
-            else if (!response.IsSuccessful)
-            {
-
-                Console.WriteLine("An error response was received from the server. The status code is " + (int)response.StatusCode);
                 return false;
             }
             else
@@ -91,6 +88,25 @@ namespace TenmoClient
                 {
                     return true;
                 }
+            }
+        }
+
+        private bool ErrorHandleResponse(IRestResponse<Account> response)
+        {
+            if (response.ResponseStatus != ResponseStatus.Completed)
+            {
+                Console.WriteLine("An error occurred communicating with the server.");
+                return false;
+            }
+            else if (!response.IsSuccessful)
+            {
+
+                Console.WriteLine("An error response was received from the server. The status code is " + (int)response.StatusCode);
+                return false;
+            }
+            else
+            {
+                return true;
             }
         }
     }

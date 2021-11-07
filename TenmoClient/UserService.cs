@@ -29,7 +29,7 @@ namespace TenmoClient
                 return response.Data;
             }
         }
-        public string GetUsername(int accountId)
+        public string GetUsernameByAccountId(int accountId)
         {
             RestRequest request = new RestRequest(API_BASE_URL + "api/user/" + $"{accountId}");
             IRestResponse<string> response = client.Get<string>(request);

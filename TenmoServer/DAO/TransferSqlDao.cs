@@ -103,9 +103,11 @@ namespace TenmoServer.DAO
                     int newId = Convert.ToInt32(cmd.ExecuteScalar());
 
                     transfer.Id = newId;
+
                     return transfer;
                 }
-            } catch (SqlException e)
+            } 
+            catch (SqlException e)
             {
                 throw new Exception(e.Message);
             }
@@ -126,9 +128,10 @@ namespace TenmoServer.DAO
 
                     return (rowsAffected > 0);
                 }
-            }catch(SqlException)
+            }
+            catch(SqlException e)
             {
-                throw;
+                throw new Exception(e.Message);
             }
         }
 

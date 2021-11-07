@@ -37,9 +37,9 @@ namespace TenmoServer.DAO
                     }
                 }
             }
-            catch (SqlException)
+            catch (SqlException e)
             {
-                throw;
+                throw new Exception(e.Message);
             }
 
             return returnUser;
@@ -63,10 +63,11 @@ namespace TenmoServer.DAO
                         username = Convert.ToString(reader["username"]);
                     }
                 }
-            } catch (SqlException)
+            } catch (SqlException e)
             {
-                throw;
+                throw new Exception(e.Message);
             }
+
             return username;
         }
 
@@ -90,9 +91,9 @@ namespace TenmoServer.DAO
                     }
                 }
             }
-            catch (SqlException)
+            catch (SqlException e)
             {
-                throw;
+                throw new Exception(e.Message);
             }
 
             return returnUsers;
@@ -117,9 +118,9 @@ namespace TenmoServer.DAO
                     }
                 }
             }
-            catch (SqlException)
+            catch (SqlException e)
             {
-                throw;
+                throw new Exception(e.Message);
             }
 
             return returnUsers;
@@ -151,9 +152,9 @@ namespace TenmoServer.DAO
                     cmd.ExecuteNonQuery();
                 }
             }
-            catch (SqlException)
+            catch (SqlException e)
             {
-                throw;
+                throw new Exception(e.Message);
             }
 
             return GetUser(username);
