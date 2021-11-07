@@ -8,7 +8,9 @@
         public string Salt { get; set; }
         public string Email { get; set; }
     }
-
+    /// <summary>
+    ///  Model to return for list of users
+    /// </summary>
     public class FrontEndUser
     {
         public int UserId { get; set; }
