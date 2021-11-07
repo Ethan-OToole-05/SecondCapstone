@@ -91,6 +91,8 @@ namespace TenmoClient
 
                 if (!int.TryParse(Console.ReadLine(), out menuSelection))
                 {
+                    menuSelection = -1;
+                    Console.Clear();
                     Console.WriteLine("Invalid input. Please enter only a number.");
                 }
                 else if (menuSelection == 1)
@@ -121,11 +123,16 @@ namespace TenmoClient
                     ActiveUserService.SetLogin(new ApiUser()); //wipe out previous login info
                     Run(); //return to entry point
                 }
-                else
+                else if (menuSelection == 0)
                 {
                     Console.Clear();
                     Console.WriteLine("Goodbye!");
                     Environment.Exit(0);
+                }
+                else
+                {
+                    Console.Clear();
+                    Console.WriteLine("Invalid menu selection.");
                 }
             }
         }
@@ -146,10 +153,14 @@ namespace TenmoClient
                 return;
             }
             Account userAccount = accountService.GetAccountByUserId(userId);
-            Console.WriteLine("---------------------");
+            Console.WriteLine("-----------------------------------------------------");
             Console.WriteLine("Transfers");
-            Console.WriteLine("ID        From/To           Amount");
-            Console.WriteLine("----------------------");
+            string first = "Id".PadRight(20);
+            string middle = "From/To".PadRight(20);
+            string last = "Amount";
+            Console.WriteLine($"{first}" + $"{middle}" + $"{last}");
+            
+            Console.WriteLine("-----------------------------------------------------");
             foreach (Transfer transfer in transferList)
             {
                 string sender;
@@ -163,7 +174,10 @@ namespace TenmoClient
                     string username = userService.GetUsernameByAccountId(transfer.AccountFrom);
                     sender = $"From: {username}";
                 }
-                Console.WriteLine($"{transfer.Id}       {sender}        ${transfer.Amount}");
+                first = $"{transfer.Id}".PadRight(20);
+                middle = $"{sender}".PadRight(20);
+                last = $"{transfer.Amount:C2}";
+                Console.WriteLine($"{first}" + $"{middle}" + $"{last}");
             }
 
             selectTransferDetails();
@@ -219,12 +233,14 @@ namespace TenmoClient
                 }
 
                 Console.Clear();
-                Console.WriteLine($"Id: {transferDetails.Id}");
-                Console.WriteLine($"From: {accountFrom}");
-                Console.WriteLine($"To:  {accountTo}");
-                Console.WriteLine($"Type: {typeTransfer}");
-                Console.WriteLine($"Status: {typeStatus}");
-                Console.WriteLine($"Amount: ${transferDetails.Amount}");
+                Console.WriteLine("---------------------");
+                Console.WriteLine($"| Id: {transferDetails.Id}".PadRight(20) + "|");
+                Console.WriteLine($"| From: {accountFrom}".PadRight(20) + "|");
+                Console.WriteLine($"| To:  {accountTo}".PadRight(20) + "|");
+                Console.WriteLine($"| Type: {typeTransfer}".PadRight(20) + "|");
+                Console.WriteLine($"| Status: {typeStatus}".PadRight(20) + "|");
+                Console.WriteLine($"| Amount: {transferDetails.Amount:C2}".PadRight(20) + "|");
+                Console.WriteLine("---------------------");
             }
         }
 
@@ -237,10 +253,13 @@ namespace TenmoClient
                 return;
             }
             Account userAccount = accountService.GetAccountByUserId(ActiveUserService.GetUserId());
-            Console.WriteLine("---------------------");
+            Console.WriteLine("-----------------------------------------------------");
             Console.WriteLine("Transfers");
-            Console.WriteLine("ID        From/To           Amount");
-            Console.WriteLine("----------------------");
+            string first = "Id".PadRight(20);
+            string middle = "From/To".PadRight(20);
+            string last = "Amount";
+            Console.WriteLine($"{first}" + $"{middle}" + $"{last}");
+            Console.WriteLine("-----------------------------------------------------");
             foreach (Transfer transfer in transferList)
             {
                 string sender;
@@ -254,8 +273,13 @@ namespace TenmoClient
                     string username = userService.GetUsernameByAccountId(transfer.AccountFrom);
                     sender = $"From: {username}";
                 }
-                Console.WriteLine($"{transfer.Id}       {sender}        ${transfer.Amount}");
+                
+                first = $"{transfer.Id}".PadRight(20);
+                middle = $"{sender}".PadRight(20);
+                last = $"{transfer.Amount:C2}";
+                Console.WriteLine($"{first}" + $"{middle}" + $"{last}");
             }
+
 
             selectPendingTransfer();
         }
@@ -341,7 +365,8 @@ namespace TenmoClient
             {
                 Console.WriteLine("Invalid ID.");
                 return;
-            } else if (ActiveUserService.GetUserId() == userToSendId)
+            } 
+            else if (ActiveUserService.GetUserId() == userToSendId)
             {
                 Console.WriteLine("Cannot send money to yourself.");
                 return;
